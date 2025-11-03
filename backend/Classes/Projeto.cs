@@ -1,5 +1,5 @@
 using System.Text.Json.Serialization;
-namespace backend.Classes;
+namespace backend.Classes
 {
   public class Projeto
   {
