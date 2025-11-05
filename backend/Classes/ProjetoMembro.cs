@@ -6,7 +6,7 @@ namespace backend.Classes
       public int ProjetoId { get; set; }
       public int UsuarioId { get; set; }
       
-      // Navigation properties
+      // Navegação de propriedades
       public Projeto? Projeto { get; set; }
       public Usuario? Usuario { get; set; }
   }

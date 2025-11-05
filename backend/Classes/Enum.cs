@@ -14,24 +14,4 @@ namespace backend.Classes
       disponivel
   }
 
-  public enum PapelMembro
-  {
-      lider,
-      colaborador,
-      candidato
-  }
-
-  public enum StatusMembro
-  {
-      aprovado,
-      pendente,
-      rejeitado
-  }
-
-  public enum StatusCandidatura
-  {
-      pendente,
-      aprovado,
-      rejeitado
-  }
 }
