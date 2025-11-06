@@ -8,8 +8,8 @@ namespace backend.Classes
       public int EnviadoPor { get; set; }
       public DateTime DataEnvio { get; set; } = DateTime.Now;
       
-      // Navegação de propriedades
-      public virtual Projeto Projeto { get; set; }
-      public virtual Usuario Usuario { get; set; }
+      // Navegação de propriedades (anuláveis — podem não estar carregadas)
+      public virtual Projeto? Projeto { get; set; }
+      public virtual Usuario? Usuario { get; set; }
   }
 }

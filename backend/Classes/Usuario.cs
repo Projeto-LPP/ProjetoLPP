@@ -11,8 +11,9 @@ namespace backend.Classes
       public DateTime DataCadastro { get; set; } = DateTime.Now;
 
       // Navegação de propriedades
-      public virtual ICollection<Projeto> ProjetosComoDono { get; set; }
-      public virtual ICollection<ProjetoMembro> ProjetosComoMembro { get; set; }
-      public virtual ICollection<Documento> DocumentosEnviados { get; set; }
+      // Inicializamos coleções para evitar avisos de propriedades não inicializadas (CS8618)
+      public virtual ICollection<Projeto> ProjetosComoDono { get; set; } = new List<Projeto>();
+      public virtual ICollection<ProjetoMembro> ProjetosComoMembro { get; set; } = new List<ProjetoMembro>();
+      public virtual ICollection<Documento> DocumentosEnviados { get; set; } = new List<Documento>();
   }
 }
