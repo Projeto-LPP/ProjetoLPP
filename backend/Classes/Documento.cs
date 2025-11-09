@@ -5,7 +5,7 @@ namespace backend.Classes
       public int Id { get; set; }
       public int ProjetoId { get; set; }
       public string UrlArquivo { get; set; } = string.Empty;
-      public int EnviadoPor { get; set; }
+      public int UsuarioId { get; set; }
       public DateTime DataEnvio { get; set; } = DateTime.Now;
       
       // Navegação de propriedades (anuláveis — podem não estar carregadas)
