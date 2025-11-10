@@ -6,18 +6,27 @@ using backend.Data;
 using backend.Repositories;
 using backend.Services;
 using Microsoft.OpenApi.Models;
+using System.Text.Json.Serialization;
 using backend.interfaces;
-using Microsoft.AspNetCore.Builder;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
+
+// Swagger Configuration
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Backend API", Version = "v1" });
+    c.SwaggerDoc("v1", new OpenApiInfo { 
+        Title = "Backend API", 
+        Version = "v1",
+        Description = "API com PostgreSQL Neon.tech"
+    });
     
-    // Add JWT Authentication to Swagger
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
@@ -43,9 +52,27 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// Database
+// Database - NEON.TECH com configurações específicas
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+{
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    options.UseNpgsql(connectionString, npgsqlOptions =>
+    {
+        npgsqlOptions.EnableRetryOnFailure(
+            maxRetryCount: 3,
+            maxRetryDelay: TimeSpan.FromSeconds(5),
+            errorCodesToAdd: null
+        );
+        npgsqlOptions.CommandTimeout(30);
+    });
+    
+    // Log para debug (remover em produção)
+    if (builder.Environment.IsDevelopment())
+    {
+        options.LogTo(Console.WriteLine, LogLevel.Information);
+        options.EnableSensitiveDataLogging();
+    }
+});
 
 // Repositories
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
@@ -54,7 +81,7 @@ builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
 // JWT Authentication
-var jwtKey = builder.Configuration["Jwt:Key"] ?? "chave-super-secreta-padrao-mudar-em-producao";
+var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new ArgumentNullException("Jwt:Key não configurada");
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -72,17 +99,17 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
-// Swagger
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Backend API v1");
+        c.RoutePrefix = string.Empty; // Para acessar em https://localhost:port/
+    });
 }
 
 app.UseHttpsRedirection();
@@ -92,5 +119,12 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Teste de saúde da API
+app.MapGet("/health", () => Results.Ok(new { 
+    status = "API funcionando", 
+    timestamp = DateTime.UtcNow,
+    database = "Neon.tech PostgreSQL"
+}));
 
 app.Run();

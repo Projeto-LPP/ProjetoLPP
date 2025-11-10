@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace backend.Classes
 {
     [JsonConverter(typeof(JsonStringEnumConverter))] // ← Adicione esta linha

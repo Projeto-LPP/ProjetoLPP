@@ -20,11 +20,11 @@ namespace backend.Controllers
         }
 
         [HttpPost("registrar")]
-        public async Task<ActionResult> Registrar([FromBody] UsuarioPostResquest registroDto)
+        public async Task<ActionResult> Registrar([FromBody] UsuarioPostResquest usuarioDto) // ← Mudei o nome do parâmetro
         {
             try
             {
-                var usuario = await _authService.RegistrarAsync(registroDto);
+                var usuario = await _authService.RegistrarAsync(usuarioDto); // ← E aqui também
                 
                 if (usuario == null)
                 {
