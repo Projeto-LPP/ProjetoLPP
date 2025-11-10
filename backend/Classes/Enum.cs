@@ -1,17 +1,19 @@
 namespace backend.Classes
 {
-  public enum PapelUsuario
-  {
-      aluno,
-      mentor,
-      admin
-  }
+    [JsonConverter(typeof(JsonStringEnumConverter))] // ← Adicione esta linha
+    public enum PapelUsuario
+    {
+        aluno = 0,
+        professor = 1,
+        administrador = 2
+    }
 
-  public enum StatusProjeto
-  {
-      concluido,
-      andamento,
-      disponivel
-  }
+    [JsonConverter(typeof(JsonStringEnumConverter))] // ← Adicione esta linha
+    public enum StatusProjeto
+    {
+        concluido = 0,
+        andamento = 1,
+        disponivel = 2
+    }
 
 }

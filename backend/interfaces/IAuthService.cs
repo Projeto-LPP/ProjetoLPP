@@ -1,7 +1,7 @@
 using backend.Classes;
 using backend.DTOs;
 
-namespace backend.Services
+namespace backend.interfaces
 {
     public interface IAuthService
     {

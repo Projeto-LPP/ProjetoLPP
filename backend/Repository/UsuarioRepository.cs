@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using backend.Classes;
 using backend.Data;
+using backend.interfaces;
 
 namespace backend.Repositories
 {

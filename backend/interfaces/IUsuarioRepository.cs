@@ -1,6 +1,6 @@
 using backend.Classes;
 
-namespace backend.Repositories
+namespace backend.interfaces
 {
     public interface IUsuarioRepository
     {
