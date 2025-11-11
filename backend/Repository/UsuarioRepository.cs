@@ -29,6 +29,15 @@ namespace backend.Repositories
                 .FirstOrDefaultAsync(u => u.Email.ToLower() == email.ToLower());
         }
 
+        public async Task<List<Usuario>> GetAllAsync()
+        {
+            return await _context.Usuarios
+                .Include(u => u.ProjetosComoDono)
+                .Include(u => u.ProjetosComoMembro)
+                .OrderBy(u => u.Nome)
+                .ToListAsync();
+        }
+
         public async Task<Usuario> CreateAsync(Usuario usuario)
         {
             _context.Usuarios.Add(usuario);
@@ -40,6 +49,16 @@ namespace backend.Repositories
         {
             _context.Usuarios.Update(usuario);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task DeleteAsync(int id)
+        {
+            var usuario = await _context.Usuarios.FindAsync(id);
+            if (usuario != null)
+            {
+                _context.Usuarios.Remove(usuario);
+                await _context.SaveChangesAsync();
+            }
         }
 
         public async Task<bool> EmailExistsAsync(string email)

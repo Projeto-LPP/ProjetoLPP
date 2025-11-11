@@ -8,7 +8,7 @@ namespace backend.Classes
       public string Senha { get; set; } = string.Empty;
       public PapelUsuario Papel { get; set; } = PapelUsuario.aluno;
       public string? BioPerfil { get; set; }
-      public DateTime DataCadastro { get; set; } = DateTime.Now;
+      public DateTime DataCadastro { get; set; } =  DateTime.UtcNow;
 
       // Navegação de propriedades
       // Inicializamos coleções para evitar avisos de propriedades não inicializadas (CS8618)

@@ -1,4 +1,3 @@
-// Services/AuthService.cs
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -34,7 +33,7 @@ namespace backend.Services
                 Senha = HashSenha(registroDto.Senha),
                 Papel = registroDto.Papel,
                 BioPerfil = registroDto.BioPerfil,
-                DataCadastro = DateTime.UtcNow
+                DataCadastro =  DateTime.UtcNow.AddHours(-3)
             };
 
             var usuarioCriado = await _usuarioRepository.CreateAsync(usuario);

@@ -14,21 +14,36 @@ namespace backend.Controllers
     [Authorize]
     public class UsuariosController : ControllerBase
     {
-        private readonly IUsuarioRepository _usuarioRepository;
-        private readonly IAuthService _authService;
+        private readonly IUsuarioService _usuarioService;
 
-        public UsuariosController(IUsuarioRepository usuarioRepository, IAuthService authService)
+        public UsuariosController(IUsuarioService usuarioService)
         {
-            _usuarioRepository = usuarioRepository;
-            _authService = authService;
+            _usuarioService = usuarioService;
         }
 
+        // GET: api/usuarios - Listar todos os usuários (apenas admin)
+        [HttpGet]
+        [Authorize(Roles = "administrador")]
+        public async Task<ActionResult> GetAllUsuarios()
+        {
+            try
+            {
+                var usuarios = await _usuarioService.GetAllUsuariosAsync();
+                return Ok(usuarios);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Erro interno do servidor.", error = ex.Message });
+            }
+        }
+
+        // GET: api/usuarios/5 - Obter usuário por ID
         [HttpGet("{id}")]
         public async Task<ActionResult> GetUsuarioById(int id)
         {
             try
             {
-                var usuario = await _authService.GetUsuarioComEstatisticasAsync(id);
+                var usuario = await _usuarioService.GetUsuarioByIdAsync(id);
                 
                 if (usuario == null)
                 {
@@ -43,28 +58,71 @@ namespace backend.Controllers
             }
         }
 
-        [HttpPut("alterar-senha")]
-        public async Task<ActionResult> AlterarSenha([FromBody] AlterarSenhaDto alterarSenhaDto)
+        // PUT: api/usuarios/5 - Atualizar usuário
+        [HttpPut("{id}")]
+        public async Task<ActionResult> UpdateUsuario(int id, [FromBody] UsuarioPutResquest usuarioDto)
         {
             try
             {
-                var usuarioId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
-                var usuario = await _usuarioRepository.GetByIdAsync(usuarioId);
+                if (id != usuarioDto.Id)
+                {
+                    return BadRequest(new { message = "ID do usuário não corresponde." });
+                }
+
+                var usuarioAtualizado = await _usuarioService.UpdateUsuarioAsync(usuarioDto);
+                
+                if (usuarioAtualizado == null)
+                {
+                    return NotFound(new { message = "Usuário não encontrado." });
+                }
+
+                return Ok(new { 
+                    message = "Usuário atualizado com sucesso!", 
+                    usuario = usuarioAtualizado 
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Erro interno do servidor.", error = ex.Message });
+            }
+        }
+
+        // DELETE: api/usuarios/5 - Excluir usuário (apenas admin ou próprio usuário)
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> DeleteUsuario(int id)
+        {
+            try
+            {
+                var success = await _usuarioService.DeleteUsuarioAsync(id);
+                
+                if (!success)
+                {
+                    return NotFound(new { message = "Usuário não encontrado." });
+                }
+
+                return Ok(new { message = "Usuário excluído com sucesso!" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Erro interno do servidor.", error = ex.Message });
+            }
+        }
+
+        // GET: api/usuarios/me - Obter dados do usuário logado
+        [HttpGet("me")]
+        public async Task<ActionResult> GetMe()
+        {
+            try
+            {
+                var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "0");
+                var usuario = await _usuarioService.GetUsuarioByIdAsync(userId);
                 
                 if (usuario == null)
                 {
                     return NotFound(new { message = "Usuário não encontrado." });
                 }
 
-                if (!_authService.VerificarSenha(alterarSenhaDto.SenhaAtual, usuario.Senha))
-                {
-                    return BadRequest(new { message = "Senha atual incorreta." });
-                }
-
-                usuario.Senha = _authService.HashSenha(alterarSenhaDto.NovaSenha);
-                await _usuarioRepository.UpdateAsync(usuario);
-
-                return Ok(new { message = "Senha alterada com sucesso!" });
+                return Ok(usuario);
             }
             catch (Exception ex)
             {
